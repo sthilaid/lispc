@@ -6,23 +6,20 @@
 
 #include <cstdio>
 #include <thread>
-#include <external/s7.h>
 
 using timept = std::chrono::time_point<std::chrono::high_resolution_clock>;
 
 int main(int argn, const char** argv) {
-    s7_scheme* sc = s7_init();
-    
     Memory mem;
     Inputs inputs;
     Screen screen;
     screen.initialize();
 
-    lispc_s7_api::register_functions(sc, mem, screen);
+    lispc_external_api* api = new lispc_s7_api();
+    api->init(mem, screen, inputs);
 
     if (argn > 1) {
-        if (!s7_load(sc, argv[1])) {
-            fprintf(stderr, "%s: %s\n", strerror(errno), argv[1]);
+        if (!api->load(argv[1])) {
             return(2);
         }
 	}
@@ -37,12 +34,10 @@ int main(int argn, const char** argv) {
         const timept now = std::chrono::high_resolution_clock::now();
         const std::chrono::duration<float, std::milli> elapsed = now-last;
         const float dt = elapsed.count() * 0.001f;
-        s7_call(sc, s7_name_to_value(sc, "update"), s7_cons(sc,
-                                                            s7_make_real(sc, dt),
-                                                            s7_nil(sc)));
-        s7_flush_output_port(sc, s7_current_output_port(sc));
+
+        api->update(dt);
+
         last = now;
-        //randomize_video_mem(mem, screen);
         screen.render(mem);
 
         using namespace std::chrono_literals;
@@ -51,14 +46,11 @@ int main(int argn, const char** argv) {
         const std::chrono::duration<float, std::milli> sleep_duration = 30ms - this_fame_elapsed;
         //printf("sleep for: %.2f\n", sleep_duration.count());
         std::this_thread::sleep_for(sleep_duration);
-
-        // timept now = std::chrono::high_resolution_clock::now();
-        // std::chrono::duration<float, std::milli> elapsed = now-start;
-        // if (elapsed.count() > 10000.0f)
-        //     break;
     }
     
     screen.uninitialize();
-    s7_free(sc);
+    api->uninit();
+    delete api;
+    
     return 0;
 }

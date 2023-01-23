@@ -1,6 +1,7 @@
 #include <api.h>
 #include <memory.h>
 #include <screen.h>
+#include <inputs.h>
 
 #include <random>
 
@@ -49,4 +50,36 @@ void lispc_s7_api::register_functions(s7_scheme* sc, Memory& mem, Screen& screen
     
     s7_define_function(sc, "randomize_video_mem", randomize_video_mem, 2, 0, false,
                        "(randomize_video_mem mem screen) randomizes all pixels on the screen");
+}
+
+void lispc_s7_api::init(Memory& mem, Screen& screen, Inputs& inputs) {
+    m_sc = s7_init();
+    register_functions(m_sc, mem, screen);
+}
+
+bool lispc_s7_api::load(const char* filename) {
+    if (!s_IsInitialized)
+        return false;
+    
+    if (!s7_load(m_sc, filename)) {
+        fprintf(stderr, "%s: %s\n", strerror(errno), filename);
+        return false;
+    }
+    return true;
+}
+
+void lispc_s7_api::update(float dt) {
+    if (!s_IsInitialized)
+        return;
+    
+    s7_call(m_sc, s7_name_to_value(m_sc, "update"), s7_cons(m_sc,
+                                                          s7_make_real(m_sc, dt),
+                                                          s7_nil(m_sc)));
+    s7_flush_output_port(m_sc, s7_current_output_port(m_sc));
+}
+
+void lispc_s7_api::uninit() {
+    s7_free(m_sc);
+    m_sc = nullptr;
+    s_IsInitialized = false;
 }
