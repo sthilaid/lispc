@@ -1,6 +1,7 @@
 #pragma once
 #include <SDL.h>
 #include <cstdint>
+#include <types.h>
 
 class Memory;
 
@@ -10,6 +11,9 @@ public:
     void render(const Memory& mem);
     void uninitialize();
 
+    void drawTriangle(float x1, float y1, float x2, float y2, float x3, float y3, uint16_t color = color_white);
+    void drawRect(float x1, float y1, float x2, float y2, uint16_t color = color_white);
+    
 private:
     static constexpr uint8_t PIXEL_ZOOM = 5;
     

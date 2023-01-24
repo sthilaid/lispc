@@ -15,11 +15,11 @@ int main(int argn, const char** argv) {
     Screen screen;
     screen.initialize();
 
-    lispc_external_api* api = new lispc_s7_api();
-    api->init(mem, screen, inputs);
+    lispc_external_api& api = lispc_s7_api::get();
+    api.init(mem, screen, inputs);
 
     if (argn > 1) {
-        if (!api->load(argv[1])) {
+        if (!api.load(argv[1])) {
             return(2);
         }
 	}
@@ -35,7 +35,7 @@ int main(int argn, const char** argv) {
         const std::chrono::duration<float, std::milli> elapsed = now-last;
         const float dt = elapsed.count() * 0.001f;
 
-        api->update(dt);
+        api.update(dt);
 
         last = now;
         screen.render(mem);
@@ -49,8 +49,7 @@ int main(int argn, const char** argv) {
     }
     
     screen.uninitialize();
-    api->uninit();
-    delete api;
+    api.uninit();
     
     return 0;
 }
