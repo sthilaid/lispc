@@ -8,6 +8,7 @@ static constexpr uint16_t SCREEN_WIDTH = 128;
 static constexpr uint16_t SCREEN_HEIGHT = 128;
 static constexpr uint16_t PIXEL_COUNT = SCREEN_WIDTH * SCREEN_HEIGHT;
 static constexpr uint16_t PIXEL_BYTECOUNT = 2; // RGBA4444
+static constexpr uint16_t PIXEL_WORDCOUNT = 1;
 static constexpr uint16_t VIDEO_MEM_SIZE = PIXEL_COUNT * PIXEL_BYTECOUNT;
 
 enum MemMap {

@@ -9,8 +9,6 @@ public:
     uint16_t* operator+(uint16_t addr) { return m_buffer+addr; }
     uint16_t operator[](uint16_t addr) const { return m_buffer[addr]; }
     uint16_t& operator[](uint16_t addr) { return m_buffer[addr]; }
-
-    void clearVideoMemory(uint16_t val = 0);
     
 private:
     void clear();

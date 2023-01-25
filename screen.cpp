@@ -60,18 +60,3 @@ void Screen::render(const Memory& mem) {
     SDL_RenderCopy( m_renderer, m_screenTexture, nullptr, nullptr );
     SDL_RenderPresent( m_renderer );
 }
-
-void Screen::drawRect(float x1, float y1, float x2, float y2, uint16_t color) {
-    SDL_SetRenderTarget(m_renderer, m_screenTexture);
-
-    SDL_Rect fillRect = { static_cast<uint16_t>(x1*SCREEN_WIDTH),
-                          static_cast<uint16_t>(y1 * SCREEN_HEIGHT),
-                          static_cast<uint16_t>((x2-x1) * SCREEN_WIDTH),
-                          static_cast<uint16_t>((y2-y1) * SCREEN_HEIGHT) };
-    uint8_t r,g,b,a;
-    color_to_rgba(color, r, g, b, a);
-    SDL_SetRenderDrawColor(m_renderer, r, g, b, a);;
-    SDL_RenderFillRect(m_renderer, &fillRect);
-
-    SDL_SetRenderTarget(m_renderer, nullptr);
-}

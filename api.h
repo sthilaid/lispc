@@ -13,7 +13,7 @@ namespace lispc_api {
     void randomize_video_mem(Memory& mem, const Screen& screen);
     uint16_t memget(Memory& mem, uint16_t addr);
     void memset(Memory& mem, uint16_t addr, uint16_t value);
-    void rect(Screen& screen, float x1, float y1, float x2, float y2, uint16_t color);
+    void rect(Memory& mem, uint16_t x1, uint16_t y1, uint16_t w, uint16_t h, uint16_t color);
     void cls(Memory& mem, uint16_t color);
 }
 

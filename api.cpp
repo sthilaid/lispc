@@ -3,6 +3,7 @@
 #include <screen.h>
 #include <inputs.h>
 
+#include <algorithm>
 #include <random>
 
 //-----------------------------------------------------------------------------
@@ -26,12 +27,20 @@ void lispc_api::memset(Memory& mem, uint16_t addr, uint16_t value) {
     mem[addr] = value;
 }
 
-void lispc_api::rect(Screen& screen, float x1, float y1, float x2, float y2, uint16_t color) {
-    screen.drawRect(x1, y1, x2, y2, color);
+void lispc_api::rect(Memory& mem, uint16_t x1, uint16_t y1, uint16_t w, uint16_t h, uint16_t color) {
+    const uint16_t validX1 = std::clamp<uint16_t>(x1, 0, SCREEN_WIDTH);
+    const uint16_t validY1 = std::clamp<uint16_t>(y1, 0, SCREEN_HEIGHT);
+    const uint16_t validW = std::clamp<uint16_t>(w, 0, SCREEN_WIDTH-validX1);
+    const uint16_t validH = std::clamp<uint16_t>(h, 0, SCREEN_HEIGHT-validY1);
+    const uint16_t corner_addr = validY1 * (SCREEN_WIDTH * PIXEL_WORDCOUNT) + validX1;
+    for (uint16_t dy = 0; dy<validH; ++dy){
+        const uint16_t lineStart = corner_addr + dy*SCREEN_WIDTH;
+        std::fill(mem+lineStart, mem+lineStart+validW, color);
+    }
 }
 
 void lispc_api::cls(Memory& mem, uint16_t color) {
-    mem.clearVideoMemory(color);
+    std::fill(mem+MemMap_Video, mem+(MemMap_Video+VIDEO_MEM_SIZE), color);
 }
 
 //-----------------------------------------------------------------------------
@@ -52,10 +61,10 @@ s7_pointer lispc_s7_api::rect(s7_scheme *sc, s7_pointer args){
 
     uint16_t x1 = s7_integer(s7_car(args));
     uint16_t y1 = s7_integer(s7_cadr(args));
-    uint16_t x2 = s7_integer(s7_caddr(args));
-    uint16_t y2 = s7_integer(s7_cadddr(args));
-    uint16_t c = s7_integer(s7_list_ref(sc, args, 5));
-    lispc_api::rect(*lispc_s7_api::get().m_screen, x1, y1, x2, y2, c);
+    uint16_t w = s7_integer(s7_caddr(args));
+    uint16_t h = s7_integer(s7_cadddr(args));
+    uint16_t c = s7_integer(s7_list_ref(sc, args, 4));
+    lispc_api::rect(*lispc_s7_api::get().m_mem, x1, y1, w, h, c);
     return s7_nil(sc);
 }
 
